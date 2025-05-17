@@ -11,6 +11,8 @@ class PostApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Test API Endpoints - Create RESTful endpoints with test coverage */
+
     public function test_can_get_all_posts()
     {
         // Create some posts
@@ -92,5 +94,28 @@ class PostApiTest extends TestCase
         $response = $this->deleteJson("/api/posts/{$post->id}");
         $response->assertStatus(204);
         $this->assertDatabaseMissing('posts',['id' => $post->id]);
+    }
+
+
+    /** Validation Testing - Ensure proper input validation */
+
+    public function test_cannot_create_post_without_title()
+    {
+        $response = $this->postJson('/api/posts', [
+            'content' => 'Content without title',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_cannot_create_post_without_content()
+    {
+        $response = $this->postJson('/api/posts', [
+            'title' => 'Title without content',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrorFor('content');
     }
 }
